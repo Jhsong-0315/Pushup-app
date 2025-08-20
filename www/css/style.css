@@ -1,0 +1,734 @@
+/* ==============================================
+   푸쉬업 챌린지 앱 스타일시트
+   ============================================== */
+
+/* CSS 변수 정의 */
+:root {
+    --primary-color: #4A90E2; 
+    --accent-color: #495057;  
+    --text-color: #4A4A4A;
+    --light-gray-color: #9B9B9B;
+    --background-color: #F7F9FC;
+    --container-bg-color: #FFFFFF;
+    
+    /* 세이프티 에어리어 변수 정의 (fallback 포함) */
+    --safe-area-inset-top: env(safe-area-inset-top, 20px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 20px);
+    --safe-area-inset-left: env(safe-area-inset-left, 0px);
+    --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+/* ==============================================
+   리셋 스타일
+   ============================================== */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+html { 
+    height: 100%; 
+    /* 안드로이드에서 주소창 숨김 효과 */
+    overflow: hidden;
+}
+
+/* ==============================================
+   기본 레이아웃
+   ============================================== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    height: 100vh;
+    height: 100dvh; /* 동적 뷰포트 높이 사용 */
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    
+    /* 세이프티 에어리어 적용 */
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+}
+
+/* 안드로이드에서 상태바 영역 확보 */
+@media screen and (max-device-width: 768px) {
+    body {
+        padding-top: max(var(--safe-area-inset-top), 24px);
+        padding-bottom: max(var(--safe-area-inset-bottom), 16px);
+    }
+}
+
+/* ==============================================
+   모바일 프레임
+   ============================================== */
+.mobile-frame {
+    width: 100%;
+    height: 100%;
+    background-color: var(--container-bg-color);
+    border-radius: 0; /* 모바일에서는 라운드 제거 */
+    box-shadow: none; /* 모바일에서는 그림자 제거 */
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 데스크톱에서만 프레임 스타일 적용 */
+@media screen and (min-width: 769px) {
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        position: static;
+        height: 100vh;
+        overflow: auto;
+    }
+    
+    .mobile-frame {
+        width: 390px;
+        height: 844px;
+        border-radius: 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* ==============================================
+   헤더
+   ============================================== */
+header {
+    flex-shrink: 0;
+    background-color: var(--container-bg-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 12px 24px;
+    z-index: 10;
+    /* 추가 상단 패딩으로 상태바 겹침 방지 */
+    padding-top: max(12px, var(--safe-area-inset-top, 12px));
+}
+
+h1 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+/* ==============================================
+   페이지 컨테이너 및 페이지
+   ============================================== */
+.page-container {
+    flex-grow: 1;
+    text-align: center;
+    display: grid;
+    background-color: var(--container-bg-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.page {
+    grid-area: 1 / 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    overflow-y: auto;
+    padding: 24px;
+    height: 100%;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    /* iOS에서 스크롤 부드럽게 */
+    -webkit-overflow-scrolling: touch;
+}
+
+.page::-webkit-scrollbar { 
+    display: none; 
+}
+
+.page.active { 
+    opacity: 1; 
+    pointer-events: auto; 
+}
+
+.page-title { 
+    font-size: 1.5rem; 
+    margin-bottom: 24px; 
+    font-weight: 800; 
+    text-align: left; 
+}
+
+/* ==============================================
+   운동 디스플레이 요소들
+   ============================================== */
+.counter-display { 
+    font-size: 4.5rem; 
+    font-weight: 800; 
+    margin: 24px 0; 
+    color: var(--primary-color); 
+}
+
+.timer-display { 
+    font-size: 1.75rem; 
+    margin: 16px 0; 
+    color: var(--light-gray-color); 
+    font-weight: 500; 
+}
+
+/* ==============================================
+   버튼 스타일
+   ============================================== */
+.buttons { 
+    display: flex; 
+    gap: 12px; 
+    justify-content: center; 
+    flex-wrap: nowrap; 
+    margin: 32px 0; 
+}
+
+button {
+    border: none; 
+    color: white; 
+    padding: 16px 24px; 
+    border-radius: 16px; 
+    font-size: 1rem;
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: all 0.2s ease-in-out;
+    flex-shrink: 1;
+    
+    /* 터치 반응성 개선 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+button:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+}
+
+button:active { 
+    transform: translateY(0); 
+    box-shadow: none; 
+}
+
+.start-workout-btn { 
+    background-color: var(--primary-color); 
+}
+
+#stopTimer { 
+    background-color: var(--accent-color); 
+}
+
+.reset-btn { 
+    background-color: #E9ECEF; 
+    color: var(--text-color); 
+}
+
+.end-session-btn { 
+    background-color: var(--primary-color); 
+}
+
+/* ==============================================
+   운동 상태 및 통계
+   ============================================== */
+.workout-status, .stats {
+    margin: 24px auto; 
+    padding: 20px; 
+    background-color: var(--background-color);
+    border-radius: 16px; 
+    text-align: left; 
+    width: 100%; 
+    max-width: 420px;
+}
+
+h3 { 
+    font-size: 1.1rem; 
+    margin-bottom: 16px; 
+    font-weight: 700; 
+}
+
+.stat-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin: 12px 0; 
+}
+
+.stat-item span:first-child { 
+    font-weight: 500; 
+    color: var(--light-gray-color); 
+}
+
+.stat-item span:last-child { 
+    font-weight: 600; 
+}
+
+.workout-status { 
+    text-align: center; 
+}
+
+.current-phase { 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    margin-bottom: 10px; 
+}
+
+.current-phase.down { 
+    color: var(--accent-color); 
+}
+
+.current-phase.up { 
+    color: var(--primary-color); 
+}
+
+.progress-info {
+    font-size: 1.1rem;
+    color: var(--light-gray-color);
+    line-height: 1.6;
+}
+
+.progress-info div span { 
+    color: var(--text-color); 
+    font-weight: 600; 
+}
+
+/* ==============================================
+   모달 스타일
+   ============================================== */
+.modal-overlay {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 1000;
+    
+    /* 세이프티 에어리어 고려 */
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+}
+
+.modal-content {
+    background: var(--container-bg-color); 
+    padding: 24px; 
+    border-radius: 20px;
+    width: 90%; 
+    max-width: 380px; 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+}
+
+.modal-content h2 { 
+    color: var(--primary-color); 
+    margin-bottom: 20px; 
+    font-size: 1.2rem; 
+}
+
+.modal-content p { 
+    color: var(--text-color); 
+    font-size: 1rem; 
+    margin-bottom: 20px; 
+    text-align: center; 
+    line-height: 1.5; 
+}
+
+.modal-buttons { 
+    display: flex; 
+    gap: 10px; 
+}
+
+.modal-buttons button { 
+    flex: 1; 
+}
+
+/* ==============================================
+   결과 테이블
+   ============================================== */
+#resultsTable { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-bottom: 20px; 
+}
+
+#resultsTable th, #resultsTable td { 
+    padding: 12px; 
+    border-bottom: 1px solid #E9ECEF; 
+    text-align: left; 
+}
+
+#resultsTable th { 
+    color: var(--light-gray-color); 
+    font-weight: 500; 
+}
+
+#closeModalBtn { 
+    width: 100%; 
+    background-color: var(--primary-color); 
+}
+
+/* ==============================================
+   캘린더 스타일
+   ============================================== */
+.calendar-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+}
+
+.calendar-header button { 
+    background: none; 
+    border: none; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+    color: var(--text-color); 
+}
+
+#currentMonth { 
+    font-size: 1.1rem; 
+    font-weight: 700; 
+}
+
+.calendar-grid { 
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 5px; 
+}
+
+.calendar-day, .calendar-date { 
+    text-align: center; 
+    padding: 8px 0; 
+    font-size: 0.9rem; 
+}
+
+.calendar-day { 
+    font-weight: 600; 
+    color: var(--light-gray-color); 
+}
+
+.calendar-date { 
+    cursor: pointer; 
+    position: relative; 
+}
+
+.calendar-date.other-month { 
+    color: #ccc; 
+}
+
+.calendar-date.has-record::after {
+    content: ''; 
+    position: absolute; 
+    bottom: 5px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 5px; 
+    height: 5px; 
+    border-radius: 50%; 
+    background-color: var(--primary-color);
+}
+
+.calendar-date.selected { 
+    background-color: var(--primary-color); 
+    color: white; 
+    border-radius: 50%; 
+}
+
+#recordDetails { 
+    margin-top: 20px; 
+    padding: 15px; 
+    background-color: var(--background-color); 
+    border-radius: 12px; 
+    min-height: 100px; 
+    text-align: left; 
+}
+
+#recordDetails h4 { 
+    font-size: 0.9rem; 
+    color: var(--primary-color); 
+    margin-bottom: 8px; 
+}
+
+.delete-record-btn {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    float: right;
+}
+
+/* ==============================================
+   하단 네비게이션
+   ============================================== */
+.bottom-nav {
+    flex-shrink: 0; 
+    display: flex; 
+    background-color: #FFFFFF;
+    border-top: 1px solid #E9ECEF; 
+    z-index: 10;
+    /* 하단 세이프티 에어리어 고려 */
+    padding-bottom: max(0px, var(--safe-area-inset-bottom, 0px));
+}
+
+.nav-btn {
+    flex: 1; 
+    padding: 18px 0; 
+    background: none; 
+    border: none; 
+    border-radius: 0;
+    color: var(--light-gray-color); 
+    font-weight: 600; 
+    font-size: 0.9rem;
+    transition: color 0.2s, background-color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.nav-btn.active { 
+    color: var(--primary-color); 
+    background-color: #f0f6ff; 
+}
+
+/* ==============================================
+   코스 카드
+   ============================================== */
+.course-card {
+    background-color: var(--background-color); 
+    border-radius: 16px; 
+    padding: 20px;
+    margin-bottom: 16px; 
+    text-align: left; 
+    cursor: pointer; 
+    transition: transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.course-card:hover { 
+    transform: scale(1.02); 
+}
+
+.course-card h3 { 
+    margin-bottom: 8px; 
+}
+
+.course-card p { 
+    font-size: 0.9rem; 
+    color: var(--light-gray-color); 
+}
+
+/* ==============================================
+   주차별 컨테이너
+   ============================================== */
+.week-container {
+    display: flex; 
+    align-items: flex-start; 
+    margin-bottom: 20px;
+    padding-left: 20px; 
+    position: relative;
+}
+
+.week-timeline {
+    position: absolute; 
+    left: 7px; 
+    top: 7px; 
+    bottom: -20px;
+    width: 2px; 
+    background-color: #E9ECEF;
+}
+
+.week-container:last-child .week-timeline { 
+    display: none; 
+}
+
+.week-dot {
+    width: 16px; 
+    height: 16px; 
+    border-radius: 50%; 
+    background-color: #E9ECEF;
+    flex-shrink: 0; 
+    margin-right: 16px; 
+    z-index: 1;
+}
+
+.week-content { 
+    flex-grow: 1; 
+}
+
+.week-title { 
+    font-weight: 700; 
+    text-align: left; 
+    margin-bottom: 12px; 
+}
+
+.day-buttons { 
+    display: flex; 
+    gap: 10px; 
+}
+
+.day-btn {
+    flex: 1; 
+    padding: 16px 10px; 
+    border-radius: 12px;
+    background-color: var(--background-color); 
+    border: none;
+    color: var(--text-color); 
+    font-weight: 600; 
+    font-size: 0.9rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.day-btn.final-test { 
+    background-color: var(--primary-color); 
+    color: white; 
+    flex-grow: 2; 
+}
+
+/* ==============================================
+   운동 전 모달
+   ============================================== */
+#preWorkoutModal .modal-content { 
+    text-align: left; 
+}
+
+#workoutSummary { 
+    margin-bottom: 20px; 
+}
+
+#workoutSummary h3 { 
+    margin-bottom: 8px; 
+}
+
+#workoutSummary p { 
+    color: var(--light-gray-color); 
+    margin-top: 4px; 
+    line-height: 1.5; 
+}
+
+#workoutSummary strong { 
+    color: var(--text-color); 
+    font-weight: 700; 
+}
+
+.setting-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin: 20px 0; 
+}
+
+.setting-row label { 
+    font-weight: 500; 
+    color: var(--light-gray-color); 
+}
+
+.setting-row input {
+    background-color: var(--background-color); 
+    border: 1px solid #E9ECEF; 
+    border-radius: 8px;
+    padding: 8px 12px; 
+    color: var(--text-color); 
+    font-size: 1rem; 
+    width: 80px; 
+    text-align: center; 
+    font-weight: 600;
+}
+
+#preWorkoutStartBtn { 
+    width: 100%; 
+    margin-top: 10px; 
+}
+
+/* ==============================================
+   자유 코스 설정
+   ============================================== */
+#freeCourseSetup {
+    background-color: var(--background-color);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.set-list-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--light-gray-color);
+    padding: 0 10px;
+}
+
+.set-list-header span:first-child { 
+    flex-basis: 20%; 
+    text-align: left;
+}
+
+.set-list-header span:last-child { 
+    flex-basis: 80%; 
+    text-align: center;
+}
+
+.set-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.set-number {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-right: 10px;
+    flex-basis: 20%;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.set-reps-input {
+    flex-basis: 80%;
+    padding: 12px;
+    border: 1px solid #E9ECEF;
+    border-radius: 12px;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 600;
+    width: 100%;
+}
+
+.set-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.set-controls button {
+    background: none;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 8px 12px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+#addSetBtn { 
+    color: var(--primary-color); 
+}
+
+#removeSetBtn { 
+    color: var(--accent-color); 
+}

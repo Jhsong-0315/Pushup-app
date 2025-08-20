@@ -1,0 +1,6 @@
+{
+  "appId": "com.pushup.challenge",
+  "appName": "Pushup Challenge",
+  "webDir": "www",
+  "android-fullscreen": false
+}
