@@ -836,3 +836,22 @@ document.addEventListener('DOMContentLoaded', () => {
     switchPage(PAGE_IDS.HOME);
     setupResultsModal(); // ✅ 메모리 누수 해결: resultsModal 설정 추가
 });
+// ==============================================
+// ✅ Capacitor 네이티브 안전 영역 처리 (CTO 작성)
+// ==============================================
+// 'deviceready'는 Capacitor의 모든 플러그인이 준비되었을 때 발생하는 이벤트입니다.
+document.addEventListener('deviceready', () => {
+  // Capacitor의 내장된 App 플러그인을 사용하여 안전 영역 변경을 감지합니다.
+  Capacitor.Plugins.App.addListener('safeAreaChanged', (data) => {
+    console.log('✅ 안전 영역 정보 수신:', data.insets);
+
+    // CSS 변수에 직접 정확한 값을 주입하여 모든 기기에서 완벽하게 맞도록 보장합니다.
+    // --safe-area-inset-top, --safe-area-inset-bottom 등은 style.css에 이미 정의되어 있습니다.
+    document.documentElement.style.setProperty('--safe-area-inset-top', `${data.insets.top}px`);
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', `${data.insets.bottom}px`);
+    document.documentElement.style.setProperty('--safe-area-inset-left', `${data.insets.left}px`);
+    document.documentElement.style.setProperty('--safe-area-inset-right', `${data.insets.right}px`);
+  });
+
+  console.log('🚀 Capacitor 안전 영역 감지기 활성화됨');
+});
