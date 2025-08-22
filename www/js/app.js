@@ -1,7 +1,7 @@
 /**
  * 푸쉬업 챌린지 앱 메인 JavaScript
  * 작성일: 2025년 8월
- * 개선사항: 상수 관리 적용, 데이터 모듈 분리 (엔진과 설계도 분리)
+ * 개선사항: 상수 관리 적용, 데이터 모듈 분리 (엔진과 설계도 분리), 메모리 누수 수정
  */
 
 // 코스 데이터 모듈 import (엔진과 분리된 설계도)
@@ -67,6 +67,9 @@ let audioContext = null, countdownInterval = null;
 let currentWorkout = null;
 let calendarDate = new Date();
 let freeCourseSets = [10, 10, 10];
+
+// ✅ 메모리 누수 해결: 모달별 정리 함수 저장소
+const modalCleanupHandlers = new Map();
 
 // ==============================================
 // DOM 요소들 캐싱
@@ -593,7 +596,7 @@ function deleteRecord(dateKey) {
 }
 
 // ==============================================
-// 모달 관리 함수들
+// 모달 관리 함수들 (✅ 메모리 누수 수정)
 // ==============================================
 function showPreWorkoutModal(workoutPlan) {
     dom.preWorkoutTitle.textContent = workoutPlan.title;
@@ -608,37 +611,105 @@ function showPreWorkoutModal(workoutPlan) {
 
     dom.preWorkoutModal.style.display = DISPLAY_STYLES.FLEX;
     
-    dom.preWorkoutStartBtn.addEventListener('click', function startHandler() {
+    // ✅ 메모리 누수 해결: 핸들러 함수들을 외부에 정의
+    function startHandler() {
         dom.preWorkoutModal.style.display = DISPLAY_STYLES.HIDE;
         dom.freeCourseSetup.style.display = DISPLAY_STYLES.HIDE;
         dom.workoutDisplay.style.display = DISPLAY_STYLES.BLOCK;
         switchPage(PAGE_IDS.COUNTER);
         startWorkout(workoutPlan);
         dom.counterPageTitle.textContent = workoutPlan.title;
+        cleanup();
+    }
+    
+    function modalCloseHandler(event) {
+        if (event.target == dom.preWorkoutModal) {
+            dom.preWorkoutModal.style.display = DISPLAY_STYLES.HIDE;
+            cleanup();
+        }
+    }
+    
+    function cleanup() {
         dom.preWorkoutStartBtn.removeEventListener('click', startHandler);
-    }, { once: true });
+        window.removeEventListener('click', modalCloseHandler);
+        modalCleanupHandlers.delete('preWorkout');
+        console.log('🧹 PreWorkoutModal 정리 완료');
+    }
+    
+    // 이전 핸들러가 있으면 먼저 정리
+    if (modalCleanupHandlers.has('preWorkout')) {
+        modalCleanupHandlers.get('preWorkout')();
+    }
+    
+    // 새 핸들러 등록 및 정리 함수 저장
+    dom.preWorkoutStartBtn.addEventListener('click', startHandler);
+    window.addEventListener('click', modalCloseHandler);
+    modalCleanupHandlers.set('preWorkout', cleanup);
 }
 
 function showDeleteConfirmModal(dateKey) {
     dom.deleteConfirmText.textContent = `${dateKey}의 기록을 정말로 삭제하시겠습니까?`;
     dom.deleteConfirmModal.style.display = DISPLAY_STYLES.FLEX;
 
-    const confirmHandler = () => {
+    // ✅ 메모리 누수 해결: 핸들러 함수들을 외부에 정의
+    function confirmHandler() {
         deleteRecord(dateKey);
         hideDeleteConfirmModal();
-    };
+        cleanup();
+    }
 
-    const cancelHandler = () => {
+    function cancelHandler() {
         hideDeleteConfirmModal();
-        dom.confirmDeleteBtn.removeEventListener('click', confirmHandler);
-    };
+        cleanup();
+    }
     
-    dom.confirmDeleteBtn.addEventListener('click', confirmHandler, { once: true });
-    dom.cancelDeleteBtn.addEventListener('click', cancelHandler, { once: true });
+    function modalCloseHandler(event) {
+        if (event.target == dom.deleteConfirmModal) {
+            hideDeleteConfirmModal();
+            cleanup();
+        }
+    }
+    
+    function cleanup() {
+        dom.confirmDeleteBtn.removeEventListener('click', confirmHandler);
+        dom.cancelDeleteBtn.removeEventListener('click', cancelHandler);
+        window.removeEventListener('click', modalCloseHandler);
+        modalCleanupHandlers.delete('deleteConfirm');
+        console.log('🧹 DeleteConfirmModal 정리 완료');
+    }
+    
+    // 이전 핸들러가 있으면 먼저 정리
+    if (modalCleanupHandlers.has('deleteConfirm')) {
+        modalCleanupHandlers.get('deleteConfirm')();
+    }
+    
+    // 새 핸들러 등록 및 정리 함수 저장
+    dom.confirmDeleteBtn.addEventListener('click', confirmHandler);
+    dom.cancelDeleteBtn.addEventListener('click', cancelHandler);
+    window.addEventListener('click', modalCloseHandler);
+    modalCleanupHandlers.set('deleteConfirm', cleanup);
 }
 
 function hideDeleteConfirmModal() {
     dom.deleteConfirmModal.style.display = DISPLAY_STYLES.HIDE;
+}
+
+// ✅ 메모리 누수 해결: resultsModal 처리
+function setupResultsModal() {
+    function modalCloseHandler(event) {
+        if (event.target == dom.resultsModal) {
+            dom.resultsModal.style.display = DISPLAY_STYLES.HIDE;
+            resetToCourseList(PAGE_IDS.CALENDAR);
+        }
+    }
+    
+    window.addEventListener('click', modalCloseHandler);
+    
+    // 정리가 필요할 때를 위해 저장
+    modalCleanupHandlers.set('results', () => {
+        window.removeEventListener('click', modalCloseHandler);
+        console.log('🧹 ResultsModal 정리 완료');
+    });
 }
 
 // ==============================================
@@ -755,19 +826,6 @@ dom.removeSetBtn.addEventListener('click', () => {
     }
 });
 
-window.addEventListener('click', (event) => {
-    if (event.target == dom.resultsModal) {
-        dom.resultsModal.style.display = DISPLAY_STYLES.HIDE;
-        resetToCourseList(PAGE_IDS.CALENDAR);
-    }
-    if (event.target == dom.preWorkoutModal) {
-        dom.preWorkoutModal.style.display = DISPLAY_STYLES.HIDE;
-    }
-    if (event.target == dom.deleteConfirmModal) {
-        hideDeleteConfirmModal();
-    }
-});
-
 // ==============================================
 // 앱 초기화
 // ==============================================
@@ -776,4 +834,5 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgressUI();
     renderCourseList();
     switchPage(PAGE_IDS.HOME);
+    setupResultsModal(); // ✅ 메모리 누수 해결: resultsModal 설정 추가
 });
